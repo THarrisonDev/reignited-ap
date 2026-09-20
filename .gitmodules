@@ -1,0 +1,6 @@
+[submodule "reignited-ap-world"]
+	path = world
+	url = https://github.com/THarrisonDev/reignited-ap-world
+[submodule "reignited-ap-client"]
+	path = client
+	url = https://github.com/THarrisonDev/reignited-ap-client
