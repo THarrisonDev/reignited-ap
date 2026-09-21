@@ -1,0 +1,28 @@
+name: parent
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  submodules:
+    name: submodule integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Submodules initialized and clean
+        run: |
+          git submodule status --recursive | tee /tmp/sub.txt
+          if grep -qE '^[-+U]' /tmp/sub.txt; then
+            echo "ERROR: submodule pointers are not in sync (see status above: '-' uninitialized, '+' checked-out sha differs, 'U' merge conflicts)" >&2
+            exit 1
+          fi
+      - name: LICENSE present in every repo
+        run: |
+          for d in . world client; do
+            test -f "$d/LICENSE" || { echo "ERROR: missing LICENSE in $d" >&2; exit 1; }
+          done
+          echo "LICENSEs OK"
