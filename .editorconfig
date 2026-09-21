@@ -1,0 +1,27 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Go: tabs are idiomatic (gofmt enforces them anyway)
+[*.go]
+indent_style = tab
+
+# Web/Lua: 2-space is the convention in the existing files
+[*.{html,css,js,lua}]
+indent_size = 2
+
+# JSON/YAML and Makefiles
+[*.{json,yml,yaml}]
+indent_size = 2
+[Makefile]
+indent_style = tab
+
+# Docs wrap in the source
+[*.md]
+max_line_length = 79
