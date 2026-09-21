@@ -35,12 +35,6 @@ then check out the installation instructions below to get up and running.
 ## Contributing
 
 Contributions are welcome! Whether you want to fix a bug, add a feature, or
-improve the documentation, your help is appreciated.
-
-1. Fork the repository and create a new branch for your changes.
-2. Make your changes, keeping the existing code style in mind.
-3. Test your changes locally to make sure everything works.
-4. Open a pull request with a clear description of what you changed and why.
-
-If you're not sure where to start, check the open issues for good first tasks —
-or open a new issue to discuss an idea before writing code.
+improve the documentation, your help is appreciated — see
+[CONTRIBUTING.md](CONTRIBUTING.md) for the repo layout, dev setup, and how
+to submit changes.
