@@ -1,0 +1,57 @@
+# --- General ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+desktop.ini
+
+# --- Logs / temp ---
+*.log
+tmp/
+*.tmp
+
+# --- Go ---
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+spyrosim/spyrosim
+client/checkd/checkd
+
+# --- Python / Archipelago world ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- C++ / UE4SS mod build artifacts ---
+*.o
+*.obj
+*.lib
+*.pdb
+*.ilk
+*.exp
+client/ue4ss_mod/build/
+
+# --- IDE / editors ---
+.vscode/
+.idea/
+*.sublime-*
+
+# --- Docs / AI working notes (never publish) ---
+docs/
+AGENTS.md
+pyrightconfig.json
+
+# --- Local env ---
+.env
+.env.*
