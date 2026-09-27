@@ -24,13 +24,13 @@ type SlotData struct {
 }
 
 // Sim is the simulated player: what it holds, what its save has collected,
-// and which of those collections the server still has to hear about.
+// and which of those collections the server has yet to hear about.
 type Sim struct {
 	slot    SlotData
 	games   []*Game
 	items   map[string]int
 	have    map[string]bool
-	gems    map[*Level]int // percent collected
+	gems    map[*Level]int // Percent of the level's gems collected.
 	byID    map[int64]string
 	inSlot  map[int64]bool
 	pending []int64
@@ -72,7 +72,8 @@ func (s *Sim) Has(item string) bool { return s.items[item] > 0 }
 
 func (s *Sim) Got(location string) bool { return s.have[location] }
 
-// MarkChecked records locations the server already has, e.g. from an earlier run.
+// MarkChecked records locations the server already has, such as from an
+// earlier run.
 func (s *Sim) MarkChecked(ids []int64) {
 	for _, id := range ids {
 		if name, ok := s.byID[id]; ok {
@@ -101,7 +102,7 @@ func (s *Sim) collectible(l *Level, c Check) bool {
 }
 
 // gemCap is the percent of the level's gems the player can collect now: the
-// highest gem check within reach, all of them when the level has none.
+// highest gem check within reach, or all of them when the level has none.
 func (s *Sim) gemCap(l *Level) int {
 	limit, capped := 0, false
 	for _, c := range l.Checks {
@@ -135,7 +136,7 @@ func (s *Sim) worthVisiting(l *Level) bool {
 }
 
 // Next is the first level, in play order, where the player can collect
-// something new; nil when the player can't get further.
+// something new, or nil when the player can't get further.
 func (s *Sim) Next() *Level {
 	for _, g := range s.games {
 		for _, l := range g.Levels {
@@ -168,7 +169,7 @@ func (s *Sim) Play(l *Level) []string {
 	return got
 }
 
-// collect saves the location and reports whether the slot has it to send.
+// collect saves the location and reports whether the slot owns it to send.
 func (s *Sim) collect(location string, id int64) bool {
 	s.have[location] = true
 	if s.inSlot[id] {
@@ -177,17 +178,18 @@ func (s *Sim) collect(location string, id int64) bool {
 	return s.inSlot[id]
 }
 
-// TakePending returns the collected location ids the server has not been sent.
+// TakePending returns and clears the collected location ids the server has
+// not yet been sent.
 func (s *Sim) TakePending() []int64 {
 	ids := s.pending
 	s.pending = nil
 	return ids
 }
 
-// count is the game's own counter: collected checks of a type, except that
-// the Spyro 1 dragon counter and the Spyro 2 orb counter follow received
-// items when shuffled (the mod reconciles the game's counters to them).
-// Spyro 3 bosses each drop an egg.
+// count is the game's own counter: collected checks of a type. When the
+// matching collectible is shuffled, the counter follows received items instead,
+// because the mod reconciles the game's counters to them. Bosses always add to
+// the egg count because their kill is the boss dungeon's egg record.
 func (s *Sim) count(g *Game, kind string) int {
 	if g.Key == "spyro1" && kind == "dragons" && s.opts(g).Options["dragon_shuffle"] == 1 {
 		return s.items[g.Prefix+"Dragon"]
@@ -195,6 +197,7 @@ func (s *Sim) count(g *Game, kind string) int {
 	if g.Key == "spyro2" && kind == "orbs" && s.opts(g).Options["orb_shuffle"] == 1 {
 		return s.items[g.Prefix+"Orb"]
 	}
+	eggShuffle := g.Key == "spyro3" && kind == "eggs" && s.opts(g).Options["egg_shuffle"] == 1
 	types := map[string][]Kind{
 		"dragons":   {KindDragon},
 		"eggs":      {KindEgg},
@@ -202,9 +205,15 @@ func (s *Sim) count(g *Game, kind string) int {
 		"talismans": {KindTalisman},
 	}[kind]
 	if g.Key == "spyro3" && kind == "eggs" {
-		types = append(types, KindBoss)
+		types = []Kind{KindBoss}
+		if !eggShuffle {
+			types = append(types, KindEgg)
+		}
 	}
 	n := 0
+	if eggShuffle {
+		n = s.items[g.Prefix+"Dragon Egg"]
+	}
 	for _, l := range g.Levels {
 		for _, c := range l.Checks {
 			for _, t := range types {
@@ -252,9 +261,8 @@ func (s *Sim) game(key string) *Game {
 	return nil
 }
 
-// Report describes where the player is stuck: every shut homeworld or portal
-// (behind an open homeworld) that still holds checks, and every open level's
-// checks the player can't reach.
+// Report describes where the player is stuck: shut homeworlds and portals
+// that still hold checks, and open levels holding unreachable checks.
 func (s *Sim) Report() []string {
 	var lines []string
 	for _, g := range s.games {

@@ -1,7 +1,6 @@
-// spyrosim plays a Spyro Reignited Trilogy slot against an Archipelago server:
-// it clears whatever levels the simulated player can reach, sends the checks
-// checkd would send, uses the items it receives, and waits when it can't get
-// further.
+// spyrosim plays a Spyro Reignited Trilogy slot against an Archipelago
+// server. It clears reachable levels, sends the checks checkd would send, and
+// uses the items it receives.
 package main
 
 import (
@@ -16,14 +15,15 @@ import (
 	"time"
 )
 
-// settle is how long the player waits for items before calling itself stuck:
-// items found by its own checks come back a moment after they are sent.
+// settle is how long the player waits for items before calling itself stuck,
+// since its own checks send items back almost immediately.
 const settle = 2 * time.Second
 
 type config struct {
 	server, slot, password, root string
 	delay                        time.Duration
 	exit                         bool
+	dryRun                       bool
 }
 
 func main() {
@@ -34,6 +34,7 @@ func main() {
 	flag.StringVar(&cfg.root, "root", ".", "reignited-ap checkout, or any directory inside it")
 	flag.DurationVar(&cfg.delay, "delay", time.Second, "time spent playing each level")
 	flag.BoolVar(&cfg.exit, "exit", false, "exit when stuck instead of waiting: status 0 if the goal is done, 1 if not")
+	flag.BoolVar(&cfg.dryRun, "dry-run", false, "never send LocationChecks — report reachability against a live slot without touching its real progress")
 	flag.Parse()
 	if cfg.slot == "" {
 		flag.Usage()
@@ -52,8 +53,8 @@ func main() {
 	}
 }
 
-// run plays until ctx ends, or (with -exit) until stuck; it reports whether
-// the goal was reached.
+// run plays until ctx ends, or (with -exit) until the player is stuck, and
+// reports whether the goal was reached.
 func run(ctx context.Context, cfg config) (bool, error) {
 	root, err := findRoot(cfg.root)
 	if err != nil {
@@ -166,16 +167,25 @@ func run(ctx context.Context, cfg config) (bool, error) {
 			}
 			idleSince = time.Time{}
 			got := sim.Play(l)
-			if err := sendChecks(ctx, c, sim); err != nil {
+			verb := "played"
+			if cfg.dryRun {
+				sim.TakePending() // Dry-run never sends what it just marked played.
+				verb = "reachable"
+			} else if err := sendChecks(ctx, c, sim); err != nil {
 				return goalSent, err
 			}
-			log.Printf("played %s%s: %s", l.Game.Prefix, l.Name, describe(l, got))
+			log.Printf("%s %s%s: %s", verb, l.Game.Prefix, l.Name, describe(l, got))
 			if !goalSent && sim.GoalMet() {
-				if err := c.send(ctx, map[string]any{"cmd": "StatusUpdate", "status": 30}); err != nil {
-					return goalSent, err
+				if cfg.dryRun {
+					goalSent = true
+					log.Printf("goal reachable (%s) — dry-run: not sending StatusUpdate", sim.Progress())
+				} else {
+					if err := c.send(ctx, map[string]any{"cmd": "StatusUpdate", "status": 30}); err != nil {
+						return goalSent, err
+					}
+					goalSent = true
+					log.Printf("goal complete (%s)", sim.Progress())
 				}
-				goalSent = true
-				log.Printf("goal complete (%s)", sim.Progress())
 			}
 			wake = time.After(cfg.delay)
 		}

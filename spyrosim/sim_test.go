@@ -271,6 +271,21 @@ func TestSpyro3EggPortalsAndCompanions(t *testing.T) {
 	}
 }
 
+func TestSpyro3EggPortalsCountEggItems(t *testing.T) {
+	s := newTestSim(t, slotOf("spyro3", map[string]int{"egg_shuffle": 1}, nil, 0))
+	playAll(s)
+	// With egg_shuffle on, Buzz's Dungeon gates on its hub's five sibling
+	// levels completing, which themselves need eggs. With zero items received,
+	// the count is genuinely 0, not a free 3 from unshuffled boss dungeons.
+	reportHas(t, s, "Spyro 3: Molten Crater: needs 10 eggs (has 0)")
+	for range 10 {
+		s.Receive("Spyro 3: Dragon Egg")
+	}
+	if s.Next() == nil {
+		t.Fatal("10 Dragon Egg items did not open Molten Crater")
+	}
+}
+
 func TestSpyro2OrbDoors(t *testing.T) {
 	s := newTestSim(t, lockedSlot(t, "spyro2"))
 	s.Receive("Spyro 2: Glimmer Key")
@@ -306,7 +321,7 @@ func TestSpyro1FlightCompleteHoldsAnItem(t *testing.T) {
 		keys[level] = "Spyro 1: " + level + " Key"
 	}
 	holds := map[int64]string{
-		103006: "Spyro 1: Stone Hill Key", // Sunny Flight Complete
+		103006: "Spyro 1: Stone Hill Key", // Sunny Flight Complete.
 		100011: "Spyro 1: Dark Hollow Key",
 		100012: "Spyro 1: Town Square Key",
 		100013: "Spyro 1: Toasty Key",
