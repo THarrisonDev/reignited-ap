@@ -13,8 +13,22 @@ const (
 	dataFile      = "world/data/%s.json"
 )
 
+// Kind enumerates the check kinds in checkd's locations.json (the values
+// gen_locations.py writes); sim.go's count() maps counter kinds to these.
+type Kind string
+
+const (
+	KindDragon   Kind = "dragon"
+	KindEgg      Kind = "egg"
+	KindGem      Kind = "gem"
+	KindOrb      Kind = "orb"
+	KindTalisman Kind = "talisman"
+	KindBoss     Kind = "boss"
+	KindEvent    Kind = "event"
+)
+
 type Check struct {
-	Type      string `json:"type"`
+	Type      Kind   `json:"type"`
 	Name      string `json:"name"`
 	Location  string `json:"location"`
 	ID        int64  `json:"id"`

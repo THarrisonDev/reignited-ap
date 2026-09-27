@@ -185,20 +185,24 @@ func (s *Sim) TakePending() []int64 {
 }
 
 // count is the game's own counter: collected checks of a type, except that
-// the Spyro 1 dragon counter follows received Dragon items under dragonsanity
-// (the mod reconciles it). Spyro 3 bosses each drop an egg.
+// the Spyro 1 dragon counter and the Spyro 2 orb counter follow received
+// items when shuffled (the mod reconciles the game's counters to them).
+// Spyro 3 bosses each drop an egg.
 func (s *Sim) count(g *Game, kind string) int {
 	if g.Key == "spyro1" && kind == "dragons" && s.opts(g).Options["dragon_shuffle"] == 1 {
 		return s.items[g.Prefix+"Dragon"]
 	}
-	types := map[string][]string{
-		"dragons":   {"dragon"},
-		"eggs":      {"egg"},
-		"orbs":      {"orb"},
-		"talismans": {"talisman"},
+	if g.Key == "spyro2" && kind == "orbs" && s.opts(g).Options["orb_shuffle"] == 1 {
+		return s.items[g.Prefix+"Orb"]
+	}
+	types := map[string][]Kind{
+		"dragons":   {KindDragon},
+		"eggs":      {KindEgg},
+		"orbs":      {KindOrb},
+		"talismans": {KindTalisman},
 	}[kind]
 	if g.Key == "spyro3" && kind == "eggs" {
-		types = append(types, "boss")
+		types = append(types, KindBoss)
 	}
 	n := 0
 	for _, l := range g.Levels {

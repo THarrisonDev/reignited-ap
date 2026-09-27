@@ -79,7 +79,7 @@ func (r spyro1) gate(s *Sim, l *Level) string {
 // item, not an event), all of which playing the level does; Gnasty's Loot
 // Complete only once the Loot's gems are all collected.
 func (spyro1) need(s *Sim, l *Level, c Check) string {
-	if c.Type == "event" && l.Type == "BONUS" {
+	if c.Type == KindEvent && l.Type == "BONUS" {
 		return atLeast("percent of "+l.Name+" gems", s.gems[l], 100)
 	}
 	return ""
@@ -204,7 +204,7 @@ func (t tabular) met(s *Sim, g *Game, req GateReq) string {
 func (t tabular) bossLocation(g *Game, boss string) string {
 	for _, l := range g.Levels {
 		for _, c := range l.Checks {
-			if c.Type == "boss" && c.Name == boss {
+			if c.Type == KindBoss && c.Name == boss {
 				return c.Location
 			}
 		}
@@ -219,7 +219,7 @@ func (t tabular) gate(s *Sim, l *Level) string {
 func (t tabular) need(s *Sim, l *Level, c Check) string {
 	g := l.Game
 	name := c.Location[len(g.Prefix):]
-	if c.Type == "gem" {
+	if c.Type == KindGem {
 		for _, tier := range []int{25, 50, 75, 100} {
 			if tier > c.Threshold {
 				break
