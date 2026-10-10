@@ -22,15 +22,18 @@ get started quickly.
 
 ## Getting Started
 
-Head over to the [Releases](../../releases) page to grab the latest version,
+Head over to the
+[Releases](https://github.com/THarrisonDev/reignited-ap/releases) page to grab the latest version,
 then check out the installation instructions below to get up and running.
 
 ## Installation
 
-1. Download the latest release from the [Releases](../../releases) page.
-2. Extract it anywhere on your computer.
-3. Run the launcher and point it at your Spyro Reignited Trilogy installation.
-4. That's it — you're ready to play!
+See [INSTALL.md](INSTALL.md) for the full player walkthrough. In short:
+
+1. Download the latest release from the
+   [Releases](https://github.com/THarrisonDev/reignited-ap/releases) page.
+2. Install UE4SS and drop the `srt_bridge` mod into the game's `Mods` folder.
+3. Run the launcher, enter your server and slot, and launch the game.
 
 ## Contributing
 

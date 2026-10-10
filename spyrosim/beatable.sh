@@ -25,7 +25,7 @@ trap stop_server EXIT
 
 mkdir -p "$work/Archipelago/worlds" "$work/players"
 (cd "$root/world" && python3 scripts/package_apworld.py \
-	"$work/Archipelago/worlds/spyro_reignited.apworld" spyro_reignited >/dev/null)
+	"$work/Archipelago/worlds/reignited.apworld" reignited >/dev/null)
 cp "$yaml" "$work/players/"
 slot=$(sed -n 's/^name: *//p' "$yaml")
 (cd "$here" && go build -o "$work/spyrosim" .)
