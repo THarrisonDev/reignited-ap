@@ -51,10 +51,13 @@ then check out the installation instructions below to get up and running.
 
 See [INSTALL.md](INSTALL.md) for the full player walkthrough. In short:
 
-1. Download the latest release from the
-   [Releases](https://github.com/THarrisonDev/reignited-ap/releases) page.
-2. Install UE4SS and drop the `srt_bridge` mod into the game's `Mods` folder.
-3. Run the launcher, enter your server and slot, and launch the game.
+1. Download the latest `reignited-ap_<version>_bundle.zip` from the
+   [Releases](https://github.com/THarrisonDev/reignited-ap/releases) page and
+   extract it.
+2. Run `client/install.bat` (Windows) or `client/install.sh` (Linux / Proton) —
+   it installs the mod, the save scanner, and UE4SS for you.
+3. Open the launcher, enter your server and slot, and click **Save & launch
+   game**.
 
 ## Contributing
 
