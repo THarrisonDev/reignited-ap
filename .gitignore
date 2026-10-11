@@ -55,3 +55,8 @@ pyrightconfig.json
 # --- Local env ---
 .env
 .env.*
+
+# --- Release bundles / build output ---
+/dist/
+reignited-ap_*_bundle.zip
+bundle/UE4SS_*.zip

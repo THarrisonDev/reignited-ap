@@ -1,0 +1,60 @@
+Reignited AP — version @VERSION@
+============================
+
+Everything you need to install and play Spyro Reignited Trilogy with
+Archipelago, in one folder. No separate downloads required.
+
+WHAT'S IN HERE
+--------------
+  client/   The launcher, the save scanner, and the UE4SS mod. Everyone who
+            plays installs this. Start here.
+  UE4SS/    The UE4SS v3.0.1 mod loader. The installer normally downloads this
+            itself, but this copy is here as a manual fallback if the download
+            is blocked (see INSTALL.md, "If the installer is blocked").
+  world/    The .apworld (reignited_@VERSION@.apworld). Only needed if you are
+            the one generating and hosting the seed.
+
+YOU WILL ALSO NEED
+------------------
+  - Spyro Reignited Trilogy on Steam (PC).
+  - Archipelago 0.6.1 or newer (https://github.com/ArchipelagoMW/Archipelago/releases).
+    Only needed to generate/host a seed; not to join one.
+
+QUICK START — PLAYING
+---------------------
+  1. Extract this whole folder somewhere easy to find.
+  2. Run the installer:
+       Windows:               double-click  client\install.bat
+       Linux (Steam/Proton):  run           client/install.sh
+     It copies the save scanner into the bridge folder, installs the mod,
+     enables it, and installs UE4SS if you don't already have it. Each step
+     prints [ok] or [FAIL].
+  3. Open the launcher:
+       Windows:  client\srtap_launcher.exe
+       Linux:    client/srtap_launcher
+     It opens a page in your browser with green ticks when everything is
+     ready. The "Install / update setup" button re-runs the installer any time.
+  4. Enter the server address and your slot name on that page, click
+     "Save & launch game", and play.
+
+  See client/INSTALL.md for the full walkthrough and troubleshooting.
+
+QUICK START — HOSTING (only if you generate the seed)
+-----------------------------------------------------
+  1. Install Archipelago.
+  2. Double-click world/reignited_@VERSION@.apworld. If you have an older
+     spyro_reignited.apworld or spyro1.apworld installed, remove it first.
+  3. Use "Generate Template Options" in the Archipelago Launcher to make a
+     YAML, edit it, and put it in players/.
+  4. Generate and host, then share the server address and slot with the
+     player(s).
+
+NOTES
+-----
+  - On Linux, launch the game through Steam so it runs under Proton.
+  - Detailed logs go to C:\srtap_bridge\bridge.log
+    (Linux prefix: ~/.local/share/Steam/steamapps/compatdata/996580/pfx/drive_c/srtap_bridge/bridge.log).
+  - Returning to the game's main menu disconnects you; the mod reconnects when
+    you are playing again.
+  - Third-party components (UE4SS, lua-apclientpp, htmx, coder/websocket) are
+    listed with their licenses in client/THIRD-PARTY-NOTICES.md.
