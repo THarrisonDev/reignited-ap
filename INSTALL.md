@@ -77,6 +77,14 @@ Launch the game through Steam so it runs under Proton on Linux.
 - Detailed logs are written to `C:\srtap_bridge\bridge.log` (or the prefix path
   above on Linux).
 
+## Optional — PopTracker
+
+The bundle also includes an optional PopTracker pack in `poptracker/` for a
+desktop tracker window. You do not need it to play. Install
+[PopTracker](https://github.com/black-sliver/PopTracker/releases) (v0.31.0 or
+newer), copy `poptracker/spyro_reignited_ap` into PopTracker's `packs` folder,
+and pick the **Archipelago** variant. See `poptracker/README.txt`.
+
 ## Troubleshooting
 
 The launcher's **Setup check** section is the first place to look — each red

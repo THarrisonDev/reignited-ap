@@ -13,6 +13,8 @@ WHAT'S IN HERE
             is blocked (see INSTALL.md, "If the installer is blocked").
   world/    The .apworld (reignited_@VERSION@.apworld). Only needed if you are
             the one generating and hosting the seed.
+  poptracker/  Optional PopTracker pack for a desktop tracker. You do not need
+            it to play. See poptracker/README.txt.
 
 YOU WILL ALSO NEED
 ------------------
