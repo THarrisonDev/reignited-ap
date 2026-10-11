@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Author: Tim Harrison
+# Created: 2026-09-26
+# Updated: 2026-10-11
+
 # beatable.sh PLAYER.yaml [SEEDS] — generate SEEDS solo seeds from the yaml
 # with the working-tree world, host each on a local MultiServer and let
 # spyrosim play it to the end. A seed passes when the player reaches the goal.
