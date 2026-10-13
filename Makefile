@@ -14,8 +14,12 @@ UE4SS_ZIP    ?= bundle/UE4SS_$(UE4SS_VER).zip
 DIST         := dist
 BUNDLE       := $(DIST)/$(WORLD_NAME)-ap_$(VERSION)
 BUNDLE_ZIP   := $(BUNDLE)_bundle.zip
+# Windows-only variant: the same bundle with the native Linux launcher
+# stripped, matching the published `_bundle-win.zip`/`.7z` artifacts.
+BUNDLE_WIN_ZIP := $(BUNDLE)_bundle-win.zip
+BUNDLE_WIN_7Z  := $(BUNDLE)_bundle-win.7z
 
-.PHONY: bundle bundle-world bundle-client bundle-poptracker clean
+.PHONY: bundle bundle-world bundle-client bundle-poptracker bundle-win clean
 
 # Assemble the whole bundle. Override UE4SS_ZIP to use a local copy instead of
 # downloading the pinned release.
@@ -31,6 +35,21 @@ bundle: bundle-world bundle-client bundle-poptracker $(UE4SS_ZIP)
 	sed 's/@VERSION@/$(VERSION)/g' bundle/START-HERE.txt > $(BUNDLE)/START-HERE.txt
 	cd $(DIST) && rm -f $(notdir $(BUNDLE_ZIP)) && zip -q -r $(notdir $(BUNDLE_ZIP)) $(notdir $(BUNDLE))
 	@echo "packaged $(abspath $(BUNDLE_ZIP))"
+
+# Windows-only artifact: stage a copy of the bundle, drop the native Linux
+# launcher, and archive it under the same top-level release name so it matches
+# the full bundle exactly apart from `client/srtap_launcher`.
+bundle-win: bundle
+	rm -rf $(DIST)/.bundle-win
+	mkdir -p $(DIST)/.bundle-win
+	cp -a $(BUNDLE) $(DIST)/.bundle-win/
+	rm -f $(DIST)/.bundle-win/$(notdir $(BUNDLE))/client/srtap_launcher
+	cd $(DIST)/.bundle-win && rm -f ../$(notdir $(BUNDLE_WIN_ZIP)) \
+		&& zip -q -r ../$(notdir $(BUNDLE_WIN_ZIP)) $(notdir $(BUNDLE))
+	cd $(DIST)/.bundle-win && rm -f ../$(notdir $(BUNDLE_WIN_7Z)) \
+		&& 7z a -y -bd -bso0 -bsp0 ../$(notdir $(BUNDLE_WIN_7Z)) $(notdir $(BUNDLE)) >/dev/null
+	rm -rf $(DIST)/.bundle-win
+	@echo "packaged $(abspath $(BUNDLE_WIN_ZIP)) and $(abspath $(BUNDLE_WIN_7Z))"
 
 # The versioned .apworld lives beside the world package (both gitignored).
 bundle-world:
