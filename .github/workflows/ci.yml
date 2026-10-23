@@ -27,6 +27,33 @@ jobs:
           done
           echo "LICENSEs OK"
 
+  quality:
+    name: lint + dead code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      # golangci-lint is pinned: its v2 CLI dropped the `-C` flag the
+      # submodule Makefiles used to need, and a surprise major bump would
+      # turn this job red for reasons unrelated to a change.
+      - name: Install lint tools
+        run: |
+          pip install ruff vulture
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq luarocks
+          sudo luarocks install luacheck
+          npm install -g jscpd
+      - run: make quality
+
   world:
     name: world (Python)
     runs-on: ubuntu-latest

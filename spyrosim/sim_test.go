@@ -103,11 +103,8 @@ func TestSpyro1VanillaReachesEverything(t *testing.T) {
 }
 
 func TestSpyro1WaitsForLevelKeys(t *testing.T) {
-	keys := map[string]string{}
-	for _, level := range []string{"Stone Hill", "Dark Hollow", "Town Square", "Sunny Flight", "Toasty"} {
-		keys[level] = "Spyro 1: " + level + " Key"
-	}
-	s := newTestSim(t, slotOf("spyro1", map[string]int{"level_locks": 1}, keys, 0))
+	s := newTestSim(t, slotOf("spyro1", map[string]int{"level_locks": 1},
+		keyedTo("Spyro 1: ", "Stone Hill", "Dark Hollow", "Town Square", "Sunny Flight", "Toasty"), 0))
 	playAll(s)
 	reportHas(t, s, "Spyro 1: Stone Hill: needs Spyro 1: Stone Hill Key")
 	reportHas(t, s, "Spyro 1: Peace Keepers: needs 10 dragons (has 4)")
@@ -220,13 +217,7 @@ func TestSpyro2GemTiers(t *testing.T) {
 }
 
 func TestSpyro2MoneyBagsWantsGems(t *testing.T) {
-	keys := map[string]string{}
-	for _, l := range testGames(t)["spyro2"].Levels {
-		if !l.IsHub {
-			keys[l.Name] = "Spyro 2: " + l.Name + " Key"
-		}
-	}
-	s := newTestSim(t, slotOf("spyro2", map[string]int{"level_locks": 1}, keys, 0))
+	s := newTestSim(t, lockedSlot(t, "spyro2"))
 	s.Receive("Spyro 2: Glimmer Key")
 	playAll(s)
 	reportHas(t, s, "Spyro 2: Summer Forest: Swim Ability needs 600 gems to pay Money Bags for Swim (has 300)")
@@ -248,12 +239,23 @@ func TestSpyro3ReachesTheSorceress(t *testing.T) {
 	}
 }
 
+// keyedTo maps each named level to the key item that opens it.
+func keyedTo(prefix string, levels ...string) map[string]string {
+	keys := make(map[string]string, len(levels))
+	for _, name := range levels {
+		keys[name] = prefix + name + " Key"
+	}
+	return keys
+}
+
+// lockedSlot is a slot whose every non-hub level waits for its own key item.
 func lockedSlot(t *testing.T, key string) SlotData {
 	t.Helper()
+	g := testGames(t)[key]
 	keys := map[string]string{}
-	for _, l := range testGames(t)[key].Levels {
+	for _, l := range g.Levels {
 		if !l.IsHub {
-			keys[l.Name] = l.Game.Prefix + l.Name + " Key"
+			keys[l.Name] = g.Prefix + l.Name + " Key"
 		}
 	}
 	return slotOf(key, map[string]int{"level_locks": 1}, keys, 0)
@@ -320,10 +322,7 @@ func playServed(s *Sim, holds map[int64]string) {
 }
 
 func TestSpyro1FlightCompleteHoldsAnItem(t *testing.T) {
-	keys := map[string]string{}
-	for _, level := range []string{"Stone Hill", "Dark Hollow", "Town Square", "Sunny Flight", "Toasty"} {
-		keys[level] = "Spyro 1: " + level + " Key"
-	}
+	keys := keyedTo("Spyro 1: ", "Stone Hill", "Dark Hollow", "Town Square", "Sunny Flight", "Toasty")
 	holds := map[int64]string{
 		103006: "Spyro 1: Stone Hill Key", // Sunny Flight Complete.
 		100011: "Spyro 1: Dark Hollow Key",

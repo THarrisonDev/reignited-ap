@@ -9,13 +9,6 @@ import (
 	"strconv"
 )
 
-func needItem(s *Sim, item string) string {
-	if s.Has(item) {
-		return ""
-	}
-	return "needs " + item
-}
-
 // needDone wants every named location of the game collected.
 func needDone(s *Sim, g *Game, locations ...string) string {
 	for _, name := range locations {
@@ -41,40 +34,64 @@ type spyro1 struct{ gates map[string]Gate }
 func (r spyro1) gate(s *Sim, l *Level) string {
 	g := l.Game
 	if gate, ok := r.gates[l.Name]; ok {
-		if req, ok := s.opts(g).GateRequirements[l.Name]; ok && req.Type == gate.Type && req.Needed > gate.Needed {
-			gate.Needed = req.Needed
-		}
-		have := s.count(g, gate.Type)
-		if gate.Type == "gems" {
-			have = s.gemCount(g)
-		}
-		return atLeast(gate.Type, have, gate.Needed)
+		return r.balloonist(s, g, l.Name, gate)
 	}
 	switch l.Name {
 	case "Toasty":
-		for _, realm := range []string{"Stone Hill", "Dark Hollow", "Town Square"} {
-			if s.Got(g.Prefix + realm + " Complete") {
-				return ""
-			}
-		}
-		return "needs one Artisans realm complete"
+		return needAnyDone(s, g, "needs one Artisans realm complete",
+			"Stone Hill Complete", "Dark Hollow Complete", "Town Square Complete")
 	case "Twilight Harbor":
 		return needDone(s, g, "Gnorc Cove Complete", "Gnorc Gnexus: Free Delbin")
 	case "Gnasty Gnorc":
 		return needDone(s, g, "Twilight Harbor Complete")
 	case "Gnasty's Loot":
-		if why := needDone(s, g, "Gnasty Gnorc Defeated"); why != "" {
-			return why
-		}
-		if why := atLeast("dragons", s.count(g, "dragons"), 80); why != "" {
-			return why
-		}
-		if why := atLeast("eggs", s.count(g, "eggs"), 12); why != "" {
-			return why
-		}
-		return atLeast("gems", s.gemCount(g), 12000)
+		return lootGate(s, g)
 	}
 	return ""
+}
+
+// balloonist is the balloonist gate of one level: the slot's raised
+// requirement when it is higher and of the same type, read off the game's
+// counter.
+func (r spyro1) balloonist(s *Sim, g *Game, name string, gate Gate) string {
+	if req, ok := s.opts(g).GateRequirements[name]; ok && req.Type == gate.Type && req.Needed > gate.Needed {
+		gate.Needed = req.Needed
+	}
+	return atLeast(gate.Type, s.counter(g, gate.Type), gate.Needed)
+}
+
+// counter is the game's counter a gate names: gems add up the levels' gems,
+// every other type counts collected checks.
+func (s *Sim) counter(g *Game, kind string) int {
+	if kind == "gems" {
+		return s.gemCount(g)
+	}
+	return s.count(g, kind)
+}
+
+// needAnyDone wants at least one of the named locations collected.
+func needAnyDone(s *Sim, g *Game, why string, locations ...string) string {
+	for _, name := range locations {
+		if s.Got(g.Prefix + name) {
+			return ""
+		}
+	}
+	return why
+}
+
+// lootGate is Gnasty's Loot's gate: the boss beaten, then the counters the
+// loot door shows.
+func lootGate(s *Sim, g *Game) string {
+	if why := needDone(s, g, "Gnasty Gnorc Defeated"); why != "" {
+		return why
+	}
+	if why := atLeast("dragons", s.count(g, "dragons"), 80); why != "" {
+		return why
+	}
+	if why := atLeast("eggs", s.count(g, "eggs"), 12); why != "" {
+		return why
+	}
+	return atLeast("gems", s.gemCount(g), 12000)
 }
 
 // need mirrors when checkd sends a Spyro 1 event location: a level's Complete
@@ -169,26 +186,63 @@ func (t tabular) pay(s *Sim, g *Game, name string) string {
 }
 
 func (t tabular) met(s *Sim, g *Game, req GateReq) string {
-	for _, boss := range req.Bosses {
+	if why := t.metBosses(s, g, req.Bosses); why != "" {
+		return why
+	}
+	if why := t.metAbilities(s, g, req.Abilities); why != "" {
+		return why
+	}
+	if why := t.metLevels(s, g, req.Levels); why != "" {
+		return why
+	}
+	if why := t.metPayments(s, g, req.Payments); why != "" {
+		return why
+	}
+	return t.metCounts(s, g, req)
+}
+
+// metBosses wants every named boss defeated.
+func (t tabular) metBosses(s *Sim, g *Game, bosses []string) string {
+	for _, boss := range bosses {
 		if !s.Got(t.bossLocation(g, boss)) {
 			return "needs " + g.Prefix + boss
 		}
 	}
-	for _, a := range req.Abilities {
+	return ""
+}
+
+// metAbilities wants every named ability owned.
+func (t tabular) metAbilities(s *Sim, g *Game, abilities []string) string {
+	for _, a := range abilities {
 		if !t.ability(s, g, a) {
 			return "needs " + g.Prefix + a + " Ability"
 		}
 	}
-	for _, name := range req.Levels {
+	return ""
+}
+
+// metLevels wants every named level open.
+func (t tabular) metLevels(s *Sim, g *Game, levels []string) string {
+	for _, name := range levels {
 		if s.Shut(t.level(g, name)) != "" {
 			return "needs " + g.Prefix + name + " open"
 		}
 	}
-	for _, name := range req.Payments {
+	return ""
+}
+
+// metPayments wants every named Money Bags payment affordable.
+func (t tabular) metPayments(s *Sim, g *Game, payments []string) string {
+	for _, name := range payments {
 		if why := t.pay(s, g, name); why != "" {
 			return why
 		}
 	}
+	return ""
+}
+
+// metCounts wants the counters the request names to be high enough.
+func (t tabular) metCounts(s *Sim, g *Game, req GateReq) string {
 	for _, c := range []struct {
 		what       string
 		have, need int

@@ -1,0 +1,26 @@
+# Minimal, fast, tuned to the simulator: correctness and complexity on, style
+# debates off. Run via `make quality` (repo root) or CI. Mirrors the client's
+# config, minus the switch/enum linters the simulator has no use for.
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: none
+  enable:
+    # Correctness
+    - errcheck      # unchecked error returns
+    - govet         # suspicious constructs (shadows, printf, etc.)
+    - staticcheck   # the standard static analysis battery
+    - ineffassign   # assignments that are never used
+    - unused        # decls and funcs nothing references
+    - unparam       # parameters that always receive the same value
+    - cyclop        # cyclomatic complexity per function (max 10)
+  settings:
+    cyclop:
+      max-complexity: 10
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

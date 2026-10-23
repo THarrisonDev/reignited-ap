@@ -1,0 +1,24 @@
+{
+  "minLines": 5,
+  "minTokens": 50,
+  "threshold": 0,
+  "absolute": true,
+  "reporters": ["console"],
+  "format": ["python", "go", "lua"],
+  "ignore": [
+    "**/dist/**",
+    "**/__pycache__/**",
+    "**/.ruff_cache/**",
+    "**/testdata/**",
+    "**/ue4ss_mod/api/**",
+    "**/*.min.js",
+    "**/world/data/*.json",
+    "**/checkd/locations.json",
+    "**/Scripts/regions.lua",
+    "**/Scripts/constants.lua",
+    "**/poptracker-pack/scripts/spyro_locmap.lua",
+    "**/poptracker-pack/scripts/spyro_itemmap.lua",
+    "**/poptracker-pack/scripts/spyro_levels.lua",
+    "**/poptracker-pack/scripts/spyro_goalmap.lua"
+  ]
+}

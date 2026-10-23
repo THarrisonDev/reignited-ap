@@ -195,29 +195,41 @@ func (s *Sim) TakePending() []int64 {
 // because the mod reconciles the game's counters to them. Bosses always add to
 // the egg count because their kill is the boss dungeon's egg record.
 func (s *Sim) count(g *Game, kind string) int {
-	if g.Key == "spyro1" && kind == "dragons" && s.opts(g).Options["dragon_shuffle"] == 1 {
+	if g.Key == "spyro1" && kind == "dragons" && s.shuffled(g, "dragon_shuffle") {
 		return s.items[g.Prefix+"Dragon"]
 	}
-	if g.Key == "spyro2" && kind == "orbs" && s.opts(g).Options["orb_shuffle"] == 1 {
+	if g.Key == "spyro2" && kind == "orbs" && s.shuffled(g, "orb_shuffle") {
 		return s.items[g.Prefix+"Orb"]
 	}
-	eggShuffle := g.Key == "spyro3" && kind == "eggs" && s.opts(g).Options["egg_shuffle"] == 1
-	types := map[string][]Kind{
+	if g.Key == "spyro3" && kind == "eggs" {
+		return s.eggCount(g)
+	}
+	return s.countKinds(g, map[string][]Kind{
 		"dragons":   {KindDragon},
 		"eggs":      {KindEgg},
 		"orbs":      {KindOrb},
 		"talismans": {KindTalisman},
-	}[kind]
-	if g.Key == "spyro3" && kind == "eggs" {
-		types = []Kind{KindBoss}
-		if !eggShuffle {
-			types = append(types, KindEgg)
-		}
+	}[kind])
+}
+
+// shuffled reports whether the slot shuffles the collectible behind opt.
+func (s *Sim) shuffled(g *Game, opt string) bool {
+	return s.opts(g).Options[opt] == 1
+}
+
+// eggCount counts Spyro 3 eggs: every boss kill is one, and with egg_shuffle on
+// the egg checks follow received Dragon Egg items instead.
+func (s *Sim) eggCount(g *Game) int {
+	n := s.countKinds(g, []Kind{KindBoss})
+	if s.shuffled(g, "egg_shuffle") {
+		return n + s.items[g.Prefix+"Dragon Egg"]
 	}
+	return n + s.countKinds(g, []Kind{KindEgg})
+}
+
+// countKinds counts the collected checks of any of the given types.
+func (s *Sim) countKinds(g *Game, types []Kind) int {
 	n := 0
-	if eggShuffle {
-		n = s.items[g.Prefix+"Dragon Egg"]
-	}
 	for _, l := range g.Levels {
 		for _, c := range l.Checks {
 			for _, t := range types {
@@ -271,31 +283,50 @@ func (s *Sim) Report() []string {
 	var lines []string
 	for _, g := range s.games {
 		for _, l := range g.Levels {
-			var left []Check
-			for _, c := range l.Checks {
-				if !s.have[c.Location] && s.inSlot[c.ID] {
-					left = append(left, c)
-				}
-			}
-			if why := s.Shut(l); why != "" {
-				if (l.Parent == nil || s.Shut(l.Parent) == "") && (l.IsHub || len(left) > 0) {
-					lines = append(lines, fmt.Sprintf("%s%s: %s", g.Prefix, l.Name, why))
-				}
-				continue
-			}
-			var reasons []string
-			byReason := map[string][]string{}
-			for _, c := range left {
-				why := g.rules.need(s, l, c)
-				if byReason[why] == nil {
-					reasons = append(reasons, why)
-				}
-				byReason[why] = append(byReason[why], strings.TrimPrefix(c.Location, g.Prefix+l.Name+": "))
-			}
-			for _, why := range reasons {
-				lines = append(lines, fmt.Sprintf("%s%s: %s %s", g.Prefix, l.Name, strings.Join(byReason[why], ", "), why))
-			}
+			lines = append(lines, s.reportLevel(g, l)...)
 		}
+	}
+	return lines
+}
+
+// reportLevel describes one level's unreachable checks, or nothing when it has
+// none worth reporting.
+func (s *Sim) reportLevel(g *Game, l *Level) []string {
+	left := s.unchecked(l)
+	if why := s.Shut(l); why != "" {
+		if (l.Parent == nil || s.Shut(l.Parent) == "") && (l.IsHub || len(left) > 0) {
+			return []string{fmt.Sprintf("%s%s: %s", g.Prefix, l.Name, why)}
+		}
+		return nil
+	}
+	return s.reasonLines(g, l, left)
+}
+
+// unchecked returns the level's checks the slot owns and the player lacks.
+func (s *Sim) unchecked(l *Level) []Check {
+	var left []Check
+	for _, c := range l.Checks {
+		if !s.have[c.Location] && s.inSlot[c.ID] {
+			left = append(left, c)
+		}
+	}
+	return left
+}
+
+// reasonLines groups unreachable checks by the rule each one fails, in the order
+// the checks come.
+func (s *Sim) reasonLines(g *Game, l *Level, left []Check) []string {
+	var lines, reasons []string
+	byReason := map[string][]string{}
+	for _, c := range left {
+		why := g.rules.need(s, l, c)
+		if byReason[why] == nil {
+			reasons = append(reasons, why)
+		}
+		byReason[why] = append(byReason[why], strings.TrimPrefix(c.Location, g.Prefix+l.Name+": "))
+	}
+	for _, why := range reasons {
+		lines = append(lines, fmt.Sprintf("%s%s: %s %s", g.Prefix, l.Name, strings.Join(byReason[why], ", "), why))
 	}
 	return lines
 }

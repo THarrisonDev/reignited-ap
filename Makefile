@@ -19,7 +19,10 @@ BUNDLE_ZIP   := $(BUNDLE)_bundle.zip
 BUNDLE_WIN_ZIP := $(BUNDLE)_bundle-win.zip
 BUNDLE_WIN_7Z  := $(BUNDLE)_bundle-win.7z
 
-.PHONY: bundle bundle-world bundle-client bundle-poptracker bundle-win clean
+# Copy-paste detector (node); `make duplication` runs it over the whole tree.
+JSCPD        ?= npx --yes jscpd
+
+.PHONY: bundle bundle-world bundle-client bundle-poptracker bundle-win quality duplication clean
 
 # Assemble the whole bundle. Override UE4SS_ZIP to use a local copy instead of
 # downloading the pinned release.
@@ -65,6 +68,36 @@ bundle-poptracker:
 $(UE4SS_ZIP):
 	mkdir -p $(dir $@)
 	curl -fL -o $@ $(UE4SS_URL)
+
+# Whole-repo quality sweep: every linter plus the dead-code and duplication
+# scans that no single-language linter covers. Each submodule runs its own
+# toolchain, so a finding is reported against the repo that owns the fix:
+#   world   -- ruff (correctness/bugs/complexity) + vulture (unreferenced names)
+#   client  -- golangci-lint (unused/unparam/cyclop/...) + luacheck (unused
+#              locals, complexity) + the Lua module audit + the generated-file
+#              audit
+#   spyrosim -- golangci-lint over the simulator
+#   poptracker -- generated files match the world data
+# plus jscpd: zero clones at >=5 lines / >=50 tokens across all four repos.
+# Install once: pip install ruff vulture; golangci-lint; luarocks install
+# luacheck; node (for npx jscpd).
+quality:
+	$(MAKE) --no-print-directory -C world check-version lint deadcode
+	$(MAKE) --no-print-directory -C client lint deadcode audit
+	$(MAKE) --no-print-directory -C poptracker-pack check
+	$(MAKE) --no-print-directory duplication
+	cd spyrosim && if command -v golangci-lint >/dev/null 2>&1; then \
+		golangci-lint run ./...; \
+	else \
+		echo "golangci-lint not found; running go vet only" >&2; \
+		go vet ./...; \
+	fi
+
+# Copy-paste check: jscpd with the repo config (.jscpd.json) fails on any
+# clone. Generated data (regions.lua, locations.json, the pack maps) is
+# excluded there, since it is emitted by the generators, not written.
+duplication:
+	$(JSCPD) world client spyrosim poptracker-pack --config .jscpd.json
 
 clean:
 	rm -rf $(DIST)
