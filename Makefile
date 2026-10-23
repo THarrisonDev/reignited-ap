@@ -101,5 +101,9 @@ quality:
 duplication:
 	$(JSCPD) world client spyrosim poptracker-pack --config .jscpd.json
 
+# Remove every build product, including the root-level bundle zips that the
+# release targets drop here (gitignored, and nothing else deletes them).
+# bundle/UE4SS_*.zip is a cached download (a build input), so it stays.
 clean:
 	rm -rf $(DIST)
+	rm -f reignited-ap_*_bundle.zip reignited-ap_*_bundle-win.zip reignited-ap_*_bundle-win.7z
