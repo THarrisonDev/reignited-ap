@@ -78,10 +78,12 @@ $(UE4SS_ZIP):
 #              audit
 #   spyrosim -- golangci-lint over the simulator
 #   poptracker -- generated files match the world data
+# also: the AP minimum version the docs advertise matches archipelago.json
 # plus jscpd: zero clones at >=5 lines / >=50 tokens across all four repos.
 # Install once: pip install ruff vulture; golangci-lint; luarocks install
 # luacheck; node (for npx jscpd).
 quality:
+	python3 scripts/audit_ap_version.py
 	$(MAKE) --no-print-directory -C world check-version lint deadcode
 	$(MAKE) --no-print-directory -C client lint deadcode audit
 	$(MAKE) --no-print-directory -C poptracker-pack check
