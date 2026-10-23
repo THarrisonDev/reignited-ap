@@ -102,12 +102,12 @@ All games: a level opens when its homeworld is open and its key has arrived
     when `spyro1_enable_flight_checks` is on) gives whatever the server says.
 - **Spyro 2 and 3** play by the gate data in `world/data/spyro2.json` and
   `spyro3.json`, the same fields the logic reads (`world/gates.py` documents
-  them; `docs/game_gates.md` lists the gates and their sources). That data
-  covers boss-chained homeworlds, talisman/orb/egg doors, the professor door,
-  the Sparx realm chain, abilities (received under sanity, bought under
-  vanilla), and every Money Bags payment. A payment needs its region open and
-  the running total of prices up to it in collected gems. Gem tiers and the
-  checks behind paid doors are covered too. Spyro 3 boss kills count as
+  them). That data covers boss-chained homeworlds, talisman/orb/egg doors, the
+  professor door, the Sparx realm chain, abilities (received under sanity,
+  bought under vanilla), and every Money Bags payment. A payment needs its
+  region open and the running total of prices up to it in collected gems. Gem
+  tiers and the checks behind paid doors are covered too. Spyro 3 boss kills
+  count as
   eggs.
 
 Not modelled: tricks and skips, and a gate the data doesn't list yet.
