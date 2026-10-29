@@ -47,11 +47,6 @@ client/ue4ss_mod/build/
 .idea/
 *.sublime-*
 
-# --- Docs / AI working notes (never publish) ---
-docs/
-AGENTS.md
-pyrightconfig.json
-
 # --- Local env ---
 .env
 .env.*
