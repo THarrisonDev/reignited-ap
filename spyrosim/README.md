@@ -58,7 +58,7 @@ gem counters.
 ## Is this config beatable?
 
 ```sh
-./beatable.sh ~/Rando/ap8/SRTPlayer.yaml 5
+./beatable.sh path/to/SRTPlayer.yaml 5
 ```
 
 Generates 5 solo seeds from the yaml with the working-tree world, hosts each
