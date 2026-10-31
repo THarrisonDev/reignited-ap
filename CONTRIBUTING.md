@@ -54,13 +54,14 @@ cd client/checkd   && go test ./...
 cd client/launcher && go test ./...
 ```
 
-`checkd` has an extensive suite backed by captured save data in
+`checkd` has an extensive suite backed by synthetic save fixtures in
 `client/checkd/testdata` (gems, orbs, skillpoints, Sparx, bosses, records,
-100% runs). If your change affects save scanning, extend the golden files
-rather than weakening assertions.
+100% runs), generated with `pygvas` by `checkd/scripts/gen_fixtures.py` — no
+real player saves. If your change affects save scanning, extend the golden
+files rather than weakening assertions.
 
-For the Lua mod, the repo-root `.luarc.json` configures LuaLS editor
-support (Lua 5.4 + the vendored `lua-apclientpp` type definitions in
+For the Lua mod, `client/.luarc.json` configures LuaLS editor support
+(Lua 5.4 + the vendored `lua-apclientpp` type definitions in
 `ue4ss_mod/api/`). The `api/` directory never ships to the game — only
 `srt_bridge/Scripts/` does.
 
