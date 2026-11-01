@@ -11,8 +11,8 @@ WHAT'S IN HERE
   UE4SS/    The UE4SS v3.0.1 mod loader. The installer normally downloads this
             itself, but this copy is here as a manual fallback if the download
             is blocked (see INSTALL.md, "If the installer is blocked").
-  world/    The .apworld (reignited_@VERSION@.apworld). Only needed if you are
-            the one generating and hosting the seed.
+  world/    The .apworld (reignited.apworld). Only needed if you are the one
+            generating and hosting the seed.
   poptracker/  Optional PopTracker pack for a desktop tracker. You do not need
             it to play. See poptracker/README.txt.
 
@@ -44,8 +44,12 @@ QUICK START — PLAYING
 QUICK START — HOSTING (only if you generate the seed)
 -----------------------------------------------------
   1. Install Archipelago.
-  2. Double-click world/reignited_@VERSION@.apworld. If you have an older
-     spyro_reignited.apworld or spyro1.apworld installed, remove it first.
+  2. In the Archipelago Launcher, click "Install APWorld" and pick
+     world/reignited.apworld from this folder (dragging the file onto the
+     launcher works too). If the launcher reports the world is already
+     loaded, close and reopen it. If you have an older build of this project
+     installed (spyro_reignited.apworld, or a dated reignited_<version>.apworld),
+     remove that first: it declares the same game.
   3. Use "Generate Template Options" in the Archipelago Launcher to make a
      YAML, edit it, and put it in players/.
   4. Generate and host, then share the server address and slot with the

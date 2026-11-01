@@ -30,7 +30,7 @@ bundle: bundle-world bundle-client bundle-poptracker $(UE4SS_ZIP)
 	@if [ -z "$(VERSION)" ]; then echo "ERROR: no world_version in world/archipelago.json" >&2; exit 1; fi
 	rm -rf $(BUNDLE)
 	mkdir -p $(BUNDLE)/world $(BUNDLE)/UE4SS $(BUNDLE)/poptracker
-	cp -f world/$(WORLD_NAME)_$(VERSION).apworld $(BUNDLE)/world/
+	cp -f world/$(WORLD_NAME).apworld $(BUNDLE)/world/
 	cp -a client/dist/client $(BUNDLE)/client
 	cp -a poptracker-pack/dist/$(PACKTRACKER) $(BUNDLE)/poptracker/
 	cp -f bundle/POPTRACKER-README.txt $(BUNDLE)/poptracker/README.txt
@@ -54,10 +54,12 @@ bundle-win: bundle
 	rm -rf $(DIST)/.bundle-win
 	@echo "packaged $(abspath $(BUNDLE_WIN_ZIP)) and $(abspath $(BUNDLE_WIN_7Z))"
 
-# The versioned .apworld lives beside the world package (both gitignored).
+# The .apworld is never versioned: Archipelago imports a world as
+# `worlds.<file stem>`, so a dotted stem (`reignited_$(VERSION)`) cannot be
+# loaded. The release zip carries the version; the file inside stays
+# `reignited.apworld`.
 bundle-world:
 	$(MAKE) --no-print-directory -C world package
-	cp -f world/$(WORLD_NAME).apworld world/$(WORLD_NAME)_$(VERSION).apworld
 
 bundle-client:
 	$(MAKE) --no-print-directory -C client package-client

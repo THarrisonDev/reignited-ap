@@ -27,9 +27,21 @@ two halves:
 Skip this if someone else is hosting and you only need to join.
 
 1. Install Archipelago.
-2. In the extracted bundle, double-click `world/reignited_<version>.apworld`.
-   If you have an older `spyro_reignited.apworld` or `spyro1.apworld` installed,
-   remove it first — they declare the same game.
+2. Add the world to Archipelago:
+   - **In the launcher:** click **Install APWorld** and pick
+     `world/reignited.apworld` from the extracted bundle. Dragging the file
+     onto the launcher does the same thing. If the launcher says the world is
+     already loaded, close and reopen it.
+   - **By hand:** copy it into your Archipelago installation's `custom_worlds`
+     folder — on the Linux AppImage that is
+     `~/.local/share/Archipelago/worlds`.
+   - Double-clicking the file only works where `.apworld` files are already
+     associated with the launcher, so treat it as optional.
+   Keep the file name as `reignited.apworld`: Archipelago imports a world under
+   its file name, so a renamed copy does not load.
+   If you installed an older build of this project — `spyro_reignited.apworld`
+   or a dated `reignited_<version>.apworld` — remove that one first: it declares
+   the same game, and Archipelago only loads one of them.
 3. In the Archipelago Launcher, use **Generate Template Options** to create a
    YAML, edit your settings, and drop it into the `players` folder.
 4. Generate and host the seed (via `archipelago.gg` or locally). You will need
