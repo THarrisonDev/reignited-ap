@@ -99,7 +99,15 @@ item explains exactly what to fix. Common ones:
 - **Game folder not found** — your Steam library is probably on another drive.
   Set the **Game folder** override on the launcher page to that install's
   `Falcon\Binaries\Win64`.
-- **Still not connecting** — open `bridge.log` and look at the last lines.
+- **Still not connecting** — open `bridge.log` and look at the last lines, or
+  send the logs in (next item).
+- **Asking for help** — click **Download logs for support** in the launcher, or
+  run `collect-logs.bat` (Windows) / `collect-logs.sh` (Linux) from the client
+  folder. Either one writes `srtap-logs-<date>.zip` next to itself with the
+  recent part of `bridge.log`, `checkd.log` and `UE4SS.log`, the bridge files,
+  and a `meta.txt` describing the install. Passwords, server addresses and slot
+  names are redacted and **save files are never included**, so the zip is safe
+  to attach to a bug report.
 
 ## Licenses
 
