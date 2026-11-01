@@ -32,9 +32,7 @@ Skip this if someone else is hosting and you only need to join.
      `world/reignited.apworld` from the extracted bundle. Dragging the file
      onto the launcher does the same thing. If the launcher says the world is
      already loaded, close and reopen it.
-   - **By hand:** copy it into your Archipelago installation's `custom_worlds`
-     folder — on the Linux AppImage that is
-     `~/.local/share/Archipelago/worlds`.
+   - **By hand:** copy it into Archipelago's `custom_worlds` folder.
    - Double-clicking the file only works where `.apworld` files are already
      associated with the launcher, so treat it as optional.
    Keep the file name as `reignited.apworld`: Archipelago imports a world under
@@ -56,8 +54,8 @@ Skip this if someone else is hosting and you only need to join.
 
    It copies the save scanner into the bridge folder, installs the mod, enables
    it in `mods.txt`, and — if you don't already have UE4SS — downloads and
-   installs UE4SS v3.0.1 into `Falcon\Binaries\Win64`. It finds the game across
-   all of your Steam libraries; on Linux it writes into the Proton prefix
+   installs UE4SS v3.0.1 into the game folder. It finds the game across all of
+   your Steam libraries; on Linux it writes into the Proton prefix
    automatically. Each step prints a `[ok]`/`[FAIL]` line.
 3. **Open the launcher** (`client\srtap_launcher.exe` on Windows,
    `client/srtap_launcher` on Linux). It opens a page in your browser and shows
@@ -65,20 +63,60 @@ Skip this if someone else is hosting and you only need to join.
    button re-runs the installer any time. Enter the server address and your slot
    name, then click **Save & launch game**.
 
-If the installer is blocked (managed machine, antivirus, no internet), do it by
-hand — everything you need is in `client/` and `UE4SS/`:
+### If the installer is blocked (manual install)
 
-- **UE4SS** — unzip `UE4SS/UE4SS_v3.0.1.zip` into `Falcon\Binaries\Win64`, so
-  `dwmapi.dll` and `UE4SS.dll` sit there. To find the folder: Steam →
-  right-click *Spyro Reignited Trilogy* → **Manage → Browse local files**.
-- **Mod** — extract `client/srt_bridge.zip` into `...\Win64\Mods\`, so you have
-  `...\Win64\Mods\srt_bridge\`, then add `srt_bridge : 1` to `Mods\mods.txt`.
-- **Save scanner** — copy `client/srtap_checkd.exe` into the bridge folder:
-  `C:\srtap_bridge\` on Windows,
-  `~/.local/share/Steam/steamapps/compatdata/996580/pfx/drive_c/srtap_bridge/`
-  on Linux (the game reads it as `C:\srtap_bridge\`).
+Same result as the installer, done by hand: three unzips or copies and two short
+text edits. Nothing is downloaded and nothing needs admin rights.
 
-Launch the game through Steam so it runs under Proton on Linux.
+Only two places come into it, so the steps below just call them by name:
+
+- **Game folder** — the one holding `Falcon.exe`. In Steam: right-click the game
+  → **Manage → Browse local files**, then open `Falcon\Binaries\Win64`.
+- **Bridge folder** — where the mod keeps its settings and log: `C:\srtap_bridge`
+  on Windows, or that same path inside the game's Proton prefix on Linux.
+
+1. **Copy in UE4SS.** Unzip `UE4SS/UE4SS_v3.0.1.zip` from the bundle into the game
+   folder, so `dwmapi.dll` and `UE4SS.dll` sit beside the game's `.exe`. Use
+   exactly this version; the mod is built against it.
+
+2. **Copy in the mod.** Extract `client/srt_bridge.zip` into the game folder's
+   `Mods` folder — you want a single `srt_bridge` folder inside `Mods`, holding
+   `Scripts\main.lua` and `Scripts\lua-apclientpp.dll`. (Extracting *into* a
+   folder already named `srt_bridge` buries it one level too deep.)
+
+3. **Turn the mod on.** Add this line on its own to `mods.txt` in that same
+   `Mods` folder, and save:
+
+   ```
+   srt_bridge : 1
+   ```
+
+   No `;` in front — that comments it out.
+
+4. **Copy in the save scanner.** Put `client/srtap_checkd.exe` in the bridge
+   folder. That is what reads your save and reports checks; the mod starts it
+   for you.
+
+5. **Type in your server details.** The easy way is to run the launcher once and
+   press **Save & launch game** — the installer is the only part you skipped. If
+   you cannot run it at all, create `config.txt` in the bridge folder with:
+
+   ```
+   host=archipelago.gg:38281
+   slot=YourSlotName
+   password=
+   spawn_checkd=1
+   ```
+
+   `host` is your server's address (no `ws://` needed), `slot` is your slot name,
+   and `spawn_checkd=1` lets the mod start the scanner on its own.
+
+6. **Start the game from Steam** — always via Steam, since that is what runs it
+   under Proton on Linux. Pick a save and play; the mod connects once you are in
+   a level.
+
+To check your work, open the launcher: its **Setup check** list green-ticks
+exactly these items, with a one-line fix for any that it does not.
 
 ## Playing
 
@@ -86,16 +124,15 @@ Launch the game through Steam so it runs under Proton on Linux.
   session once you are actually playing, so you can switch or delete saves
   first. **Returning to the main menu disconnects.**
 - Keep the launcher page open to watch checks you send and items you receive.
-- Detailed logs are written to `C:\srtap_bridge\bridge.log` (or the prefix path
-  above on Linux).
+- Detailed logs are written to `bridge.log` in the bridge folder.
 
 ## Optional — PopTracker
 
 The bundle also includes an optional PopTracker pack in `poptracker/` for a
 desktop tracker window. You do not need it to play. Install
 [PopTracker](https://github.com/black-sliver/PopTracker/releases) (v0.31.0 or
-newer), copy `poptracker/spyro_reignited_ap` into PopTracker's `packs` folder,
-and pick the **Archipelago** variant. See `poptracker/README.txt`.
+newer), copy the `spyro_reignited_ap` pack into PopTracker's `packs` folder, and
+pick the **Archipelago** variant. See `poptracker/README.txt`.
 
 ## Troubleshooting
 
@@ -104,13 +141,13 @@ item explains exactly what to fix. Common ones:
 
 - **Check daemon missing** — `srtap_checkd.exe` is not in the bridge folder.
   Click **Install / update setup**, or copy it in by hand (Part 2).
-- **`lua-apclientpp.dll` missing** — it must sit next to `main.lua` in
-  `Mods\srt_bridge\Scripts\`. It ships inside `srt_bridge.zip`; if you copied the
-  folder by hand, make sure it came along.
-- **srt_bridge not enabled** — add `srt_bridge : 1` to `Mods\mods.txt`.
+- **`lua-apclientpp.dll` missing** — it must sit next to `main.lua` in the mod's
+  `Scripts` folder. It ships inside `srt_bridge.zip`; if you copied the folder by
+  hand, make sure it came along.
+- **srt_bridge not enabled** — add `srt_bridge : 1` to `mods.txt`.
 - **Game folder not found** — your Steam library is probably on another drive.
-  Set the **Game folder** override on the launcher page to that install's
-  `Falcon\Binaries\Win64`.
+  Set the **Game folder** override on the launcher page to the folder holding
+  `Falcon.exe` on that drive.
 - **Still not connecting** — open `bridge.log` and look at the last lines, or
   send the logs in (next item).
 - **Asking for help** — click **Download logs for support** in the launcher, or
@@ -124,5 +161,5 @@ item explains exactly what to fix. Common ones:
 ## Licenses
 
 Reignited AP is GPL-3.0. The bundled third-party components (UE4SS,
-lua-apclientpp, htmx, coder/websocket) are listed with their licenses in
-`client/THIRD-PARTY-NOTICES.md`.
+lua-apclientpp, htmx, coder/websocket) are listed with their licenses in the
+bundle's `THIRD-PARTY-NOTICES.md`.
