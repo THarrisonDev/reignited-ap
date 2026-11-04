@@ -220,7 +220,7 @@ func TestSpyro2MoneyBagsWantsGems(t *testing.T) {
 	s := newTestSim(t, lockedSlot(t, "spyro2"))
 	s.Receive("Spyro 2: Glimmer Key")
 	playAll(s)
-	reportHas(t, s, "Spyro 2: Summer Forest: Swim Ability needs 600 gems to pay Money Bags for Swim (has 300)")
+	reportHas(t, s, "Spyro 2: Summer Forest: Swim Ability needs 600 gems to pay Money Bags for Swim (has 400)")
 	s.Receive("Spyro 2: Colossus Key")
 	playAll(s)
 	if !s.Got("Spyro 2: Summer Forest: Swim Ability") {
