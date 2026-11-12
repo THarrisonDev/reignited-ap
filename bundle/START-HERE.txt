@@ -58,8 +58,9 @@ QUICK START — HOSTING (only if you generate the seed)
 NOTES
 -----
   - On Linux, launch the game through Steam so it runs under Proton.
-  - Detailed logs go to C:\srtap_bridge\bridge.log
-    (Linux prefix: ~/.local/share/Steam/steamapps/compatdata/996580/pfx/drive_c/srtap_bridge/bridge.log).
+  - Detailed logs go to `%LOCALAPPDATA%\srtap_bridge\bridge.log` on Windows
+    (Linux prefix: .../compatdata/996580/pfx/drive_c/users/steamuser/AppData/Local/srtap_bridge/bridge.log).
+    Older installs may still use `C:\srtap_bridge`.
   - If something goes wrong, click "Download logs for support" in the launcher
     (or run client\collect-logs.bat / client/collect-logs.sh) and attach the zip
     to your report. Connection details are redacted and save files are never

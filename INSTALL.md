@@ -54,14 +54,36 @@ Skip this if someone else is hosting and you only need to join.
 
    It copies the save scanner into the bridge folder, installs the mod, enables
    it in `mods.txt`, and — if you don't already have UE4SS — downloads and
-   installs UE4SS v3.0.1 into the game folder. It finds the game across all of
-   your Steam libraries; on Linux it writes into the Proton prefix
-   automatically. Each step prints a `[ok]`/`[FAIL]` line.
+   installs UE4SS v3.0.1 into the game folder. It finds Steam wherever it is
+   installed (registry on Windows; native, Flatpak and Snap on Linux) and
+   searches every Steam library, so a game on another drive is found too. On
+   Linux it writes into the game's Proton prefix automatically. Each step
+   prints a `[ok]`/`[FAIL]` line.
+
+   If the game has **never been launched**, start it once from Steam and quit,
+   then run the installer again. The game-folder steps work either way, but
+   Steam only creates the Proton prefix on first launch and the save scanner
+   needs it. If the game was already running, restart it so it loads the
+   updated mod.
 3. **Open the launcher** (`client\srtap_launcher.exe` on Windows,
    `client/srtap_launcher` on Linux). It opens a page in your browser and shows
    green ticks when everything is in place; the **Install / update setup**
    button re-runs the installer any time. Enter the server address and your slot
    name, then click **Save & launch game**.
+
+   The launcher re-detects the folders every time it starts (the fields say
+   *(auto-detected)*). Type in a folder only to override that guess; **↺ Reset to
+   auto-detected** puts it back. If Steam or the game moves, press Reset rather
+   than fixing both fields by hand.
+
+   **Linux:** add this to the game's Steam launch options (right-click the game
+   → Properties → Launch Options):
+
+   ```
+   WINEDLLOVERRIDES="dwmapi=n,b" %command%
+   ```
+
+   Without it the game runs but the mod never loads.
 
 ### If the installer is blocked (manual install)
 
@@ -72,8 +94,12 @@ Only two places come into it, so the steps below just call them by name:
 
 - **Game folder** — the one holding `Falcon.exe`. In Steam: right-click the game
   → **Manage → Browse local files**, then open `Falcon\Binaries\Win64`.
-- **Bridge folder** — where the mod keeps its settings and log: `C:\srtap_bridge`
-  on Windows, or that same path inside the game's Proton prefix on Linux.
+- **Bridge folder** — where the mod keeps its settings and log:
+  `%LOCALAPPDATA%\srtap_bridge` on Windows (usually
+  `C:\Users\<you>\AppData\Local\srtap_bridge`), or that same path inside the
+  game's Proton prefix on Linux. An older install that used `C:\srtap_bridge`
+  keeps working: running the installer once copies its files to the new
+  location.
 
 1. **Copy in UE4SS.** Unzip `UE4SS/UE4SS_v3.0.1.zip` from the bundle into the game
    folder, so `dwmapi.dll` and `UE4SS.dll` sit beside the game's `.exe`. Use
@@ -115,6 +141,8 @@ Only two places come into it, so the steps below just call them by name:
    under Proton on Linux. Pick a save and play; the mod connects once you are in
    a level.
 
+   On Linux, also add the launch options from Part 2.
+
 To check your work, open the launcher: its **Setup check** list green-ticks
 exactly these items, with a one-line fix for any that it does not.
 
@@ -145,11 +173,22 @@ item explains exactly what to fix. Common ones:
   `Scripts` folder. It ships inside `srt_bridge.zip`; if you copied the folder by
   hand, make sure it came along.
 - **srt_bridge not enabled** — add `srt_bridge : 1` to `mods.txt`.
-- **Game folder not found** — your Steam library is probably on another drive.
-  Set the **Game folder** override on the launcher page to the folder holding
-  `Falcon.exe` on that drive.
-- **Still not connecting** — open `bridge.log` and look at the last lines, or
-  send the logs in (next item).
+- **Game folder not found** — the launcher searches every Steam library the
+  client knows about. If it still misses, open **Folder locations**, check the
+  discovery lines against your install, and set the **Game folder** override to
+  the folder holding `Falcon.exe` on that drive; then press **Save config**.
+  Moving a library later is handled by **↺ Reset to auto-detected**.
+- **No Proton prefix (Linux)** — the game has not been launched yet. Start it
+  once from Steam, quit, then click **Install / update setup** again.
+- **Game runs but the mod never connects (Linux)** — the launch options are
+  missing. Add `WINEDLLOVERRIDES="dwmapi=n,b" %command%` to the game's Steam
+  launch options; without it the game runs but nothing loads, and there is no
+  `UE4SS.log` to look at.
+- **Bridge folder looks wrong after moving the game** — press **↺ Reset to
+  auto-detected**. The launcher prefers the prefix the game last wrote to, so a
+  stale folder should no longer win.
+- **Still not connecting** — open `bridge.log` in the bridge folder and look at
+  the last lines, or send the logs in (next item).
 - **Asking for help** — click **Download logs for support** in the launcher, or
   run `collect-logs.bat` (Windows) / `collect-logs.sh` (Linux) from the client
   folder. Either one writes `srtap-logs-<date>.zip` next to itself with the

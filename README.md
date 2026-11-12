@@ -55,7 +55,8 @@ See [INSTALL.md](INSTALL.md) for the full player walkthrough. In short:
    [Releases](https://github.com/THarrisonDev/reignited-ap/releases) page and
    extract it.
 2. Run `client/install.bat` (Windows) or `client/install.sh` (Linux / Proton) —
-   it installs the mod, the save scanner, and UE4SS for you.
+   it installs the mod, the save scanner, and UE4SS for you. (On Linux, start
+   the game once first if it has never run, so Steam creates the Proton prefix.)
 3. Open the launcher, enter your server and slot, and click **Save & launch
    game**.
 
