@@ -1,6 +1,6 @@
 // Author: Tim Harrison
 // Created: 2026-09-26
-// Updated: 2026-10-23
+// Updated: 2026-11-13
 
 package main
 
@@ -104,7 +104,7 @@ func TestSpyro1VanillaReachesEverything(t *testing.T) {
 
 func TestSpyro1WaitsForLevelKeys(t *testing.T) {
 	s := newTestSim(t, slotOf("spyro1", map[string]int{"level_locks": 1},
-		keyedTo("Spyro 1: ", "Stone Hill", "Dark Hollow", "Town Square", "Sunny Flight", "Toasty"), 0))
+		keyedTo("Stone Hill", "Dark Hollow", "Town Square", "Sunny Flight", "Toasty"), 0))
 	playAll(s)
 	reportHas(t, s, "Spyro 1: Stone Hill: needs Spyro 1: Stone Hill Key")
 	reportHas(t, s, "Spyro 1: Peace Keepers: needs 10 dragons (has 4)")
@@ -115,6 +115,57 @@ func TestSpyro1WaitsForLevelKeys(t *testing.T) {
 	reportHas(t, s, "Spyro 1: Peace Keepers: needs 10 dragons (has 8)")
 	if !s.Got("Spyro 1: Stone Hill Complete") {
 		t.Error("Stone Hill not played after its key arrived")
+	}
+}
+
+func TestHubOpensOnAnyChildKey(t *testing.T) {
+	s := newTestSim(t, slotOf("spyro1", map[string]int{"level_locks": 1},
+		keyedTo("Artisans", "Dry Canyon"), 0))
+	artisans := levelNamed(t, s, "Artisans")
+	keepers := levelNamed(t, s, "Peace Keepers")
+	if why := s.Shut(keepers); why != "Artisans is shut" {
+		t.Fatalf("Peace Keepers with no child key: %q, want its shut parent", why)
+	}
+	if why := s.game("spyro1").rules.gate(s, keepers); why == "" {
+		t.Fatal("Peace Keepers gate passes, so the case needs no hub rule")
+	}
+	s.Receive("Spyro 1: Dry Canyon Key")
+	if why := s.Shut(artisans); why != "needs Spyro 1: Artisans Key" {
+		t.Errorf("Peace Keepers' parent opened without its key: %q", why)
+	}
+	if why := s.Shut(keepers); why != "" {
+		t.Errorf("Peace Keepers still shut with a child's key: %q", why)
+	}
+}
+
+func TestNonHubLevelsKeepTheirOwnRules(t *testing.T) {
+	s := newTestSim(t, slotOf("spyro1", map[string]int{"level_locks": 1},
+		keyedTo("Dry Canyon", "Ice Cavern", "Toasty"), 0))
+	s.Receive("Spyro 1: Dry Canyon Key")
+	if why := s.Shut(levelNamed(t, s, "Peace Keepers")); why != "" {
+		t.Fatalf("Peace Keepers did not open on a child's key: %q", why)
+	}
+	if why := s.Shut(levelNamed(t, s, "Ice Cavern")); why != "needs Spyro 1: Ice Cavern Key" {
+		t.Errorf("a sibling's key opened Ice Cavern: %q", why)
+	}
+	s.Receive("Spyro 1: Toasty Key")
+	if why := s.Shut(levelNamed(t, s, "Toasty")); why != "needs one Artisans realm complete" {
+		t.Errorf("Toasty ignored its gate with its own key: %q", why)
+	}
+}
+
+func TestHubStaysShutWithNoKeys(t *testing.T) {
+	for _, slot := range []SlotData{
+		slotOf("spyro1", map[string]int{"level_locks": 1}, keyedTo("Dry Canyon"), 0),
+		slotOf("spyro1", nil, nil, 0),
+	} {
+		s := newTestSim(t, slot)
+		if why := s.Shut(levelNamed(t, s, "Peace Keepers")); why != "needs 10 dragons (has 0)" {
+			t.Errorf("Peace Keepers with no keys held: %q, want its gate", why)
+		}
+		if why := s.Shut(levelNamed(t, s, "Dry Canyon")); why != "Peace Keepers is shut" {
+			t.Errorf("Dry Canyon with no keys held: %q", why)
+		}
 	}
 }
 
@@ -239,11 +290,25 @@ func TestSpyro3ReachesTheSorceress(t *testing.T) {
 	}
 }
 
-// keyedTo maps each named level to the key item that opens it.
-func keyedTo(prefix string, levels ...string) map[string]string {
+// levelNamed returns the named level of the slot's games.
+func levelNamed(t *testing.T, s *Sim, name string) *Level {
+	t.Helper()
+	for _, g := range s.games {
+		for _, l := range g.Levels {
+			if l.Name == name {
+				return l
+			}
+		}
+	}
+	t.Fatalf("no level named %q", name)
+	return nil
+}
+
+// keyedTo maps each named Spyro 1 level to the key item that opens it.
+func keyedTo(levels ...string) map[string]string {
 	keys := make(map[string]string, len(levels))
 	for _, name := range levels {
-		keys[name] = prefix + name + " Key"
+		keys[name] = "Spyro 1: " + name + " Key"
 	}
 	return keys
 }
@@ -322,7 +387,7 @@ func playServed(s *Sim, holds map[int64]string) {
 }
 
 func TestSpyro1FlightCompleteHoldsAnItem(t *testing.T) {
-	keys := keyedTo("Spyro 1: ", "Stone Hill", "Dark Hollow", "Town Square", "Sunny Flight", "Toasty")
+	keys := keyedTo("Stone Hill", "Dark Hollow", "Town Square", "Sunny Flight", "Toasty")
 	holds := map[int64]string{
 		103006: "Spyro 1: Stone Hill Key", // Sunny Flight Complete.
 		100011: "Spyro 1: Dark Hollow Key",

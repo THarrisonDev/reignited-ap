@@ -1,6 +1,6 @@
 // Author: Tim Harrison
 // Created: 2026-09-26
-// Updated: 2026-10-23
+// Updated: 2026-11-13
 
 package main
 
@@ -90,6 +90,9 @@ func (s *Sim) opts(g *Game) GameSlot { return s.slot.Games[g.Key] }
 
 // Shut says why the player cannot enter the level, or "" when they can.
 func (s *Sim) Shut(l *Level) string {
+	if s.hubOpen(l) {
+		return ""
+	}
 	if l.Parent != nil {
 		if why := s.Shut(l.Parent); why != "" {
 			return l.Parent.Name + " is shut"
@@ -99,6 +102,24 @@ func (s *Sim) Shut(l *Level) string {
 		return "needs " + key
 	}
 	return l.Game.rules.gate(s, l)
+}
+
+// hubOpen reports whether the level is a homeworld the player reaches on a
+// child level's key: the Guide Book marks the hub page visited when any of its
+// levels' keys arrives, and the jump to it only checks that it can load, so the
+// hub's own gate and its parent do not matter.
+func (s *Sim) hubOpen(l *Level) bool {
+	if !l.IsHub {
+		return false
+	}
+	keys := s.opts(l.Game).LevelKeys
+	for _, child := range l.Game.Levels {
+		key, locked := keys[child.Name]
+		if child.Parent == l && locked && s.Has(key) {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Sim) collectible(l *Level, c Check) bool {
