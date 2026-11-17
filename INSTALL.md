@@ -154,14 +154,6 @@ exactly these items, with a one-line fix for any that it does not.
 - Keep the launcher page open to watch checks you send and items you receive.
 - Detailed logs are written to `bridge.log` in the bridge folder.
 
-## Optional — PopTracker
-
-The bundle also includes an optional PopTracker pack in `poptracker/` for a
-desktop tracker window. You do not need it to play. Install
-[PopTracker](https://github.com/black-sliver/PopTracker/releases) (v0.31.0 or
-newer), copy the `spyro_reignited_ap` pack into PopTracker's `packs` folder, and
-pick the **Archipelago** variant. See `poptracker/README.txt`.
-
 ## Troubleshooting
 
 The launcher's **Setup check** section is the first place to look — each red

@@ -6,7 +6,6 @@
 
 VERSION      := $(shell sed -n 's/.*"world_version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' world/archipelago.json)
 WORLD_NAME   := reignited
-PACKTRACKER  := spyro_reignited_ap
 UE4SS_VER    := v3.0.1
 UE4SS_URL    := https://github.com/UE4SS-RE/RE-UE4SS/releases/download/$(UE4SS_VER)/UE4SS_$(UE4SS_VER).zip
 UE4SS_ZIP    ?= bundle/UE4SS_$(UE4SS_VER).zip
@@ -22,18 +21,16 @@ BUNDLE_WIN_7Z  := $(BUNDLE)_bundle-win.7z
 # Copy-paste detector (node); `make duplication` runs it over the whole tree.
 JSCPD        ?= npx --yes jscpd
 
-.PHONY: bundle bundle-world bundle-client bundle-poptracker bundle-win quality duplication clean
+.PHONY: bundle bundle-world bundle-client bundle-win quality duplication clean
 
 # Assemble the whole bundle. Override UE4SS_ZIP to use a local copy instead of
 # downloading the pinned release.
-bundle: bundle-world bundle-client bundle-poptracker $(UE4SS_ZIP)
+bundle: bundle-world bundle-client $(UE4SS_ZIP)
 	@if [ -z "$(VERSION)" ]; then echo "ERROR: no world_version in world/archipelago.json" >&2; exit 1; fi
 	rm -rf $(BUNDLE)
-	mkdir -p $(BUNDLE)/world $(BUNDLE)/UE4SS $(BUNDLE)/poptracker
+	mkdir -p $(BUNDLE)/world $(BUNDLE)/UE4SS
 	cp -f world/$(WORLD_NAME).apworld $(BUNDLE)/world/
 	cp -a client/dist/client $(BUNDLE)/client
-	cp -a poptracker-pack/dist/$(PACKTRACKER) $(BUNDLE)/poptracker/
-	cp -f bundle/POPTRACKER-README.txt $(BUNDLE)/poptracker/README.txt
 	cp -f $(UE4SS_ZIP) $(BUNDLE)/UE4SS/
 	sed 's/@VERSION@/$(VERSION)/g' bundle/START-HERE.txt > $(BUNDLE)/START-HERE.txt
 	cd $(DIST) && rm -f $(notdir $(BUNDLE_ZIP)) && zip -q -r $(notdir $(BUNDLE_ZIP)) $(notdir $(BUNDLE))
@@ -64,9 +61,6 @@ bundle-world:
 bundle-client:
 	$(MAKE) --no-print-directory -C client package-client
 
-bundle-poptracker:
-	$(MAKE) --no-print-directory -C poptracker-pack package
-
 $(UE4SS_ZIP):
 	mkdir -p $(dir $@)
 	curl -fL -o $@ $(UE4SS_URL)
@@ -79,16 +73,14 @@ $(UE4SS_ZIP):
 #              locals, complexity) + the Lua module audit + the generated-file
 #              audit
 #   spyrosim -- golangci-lint over the simulator
-#   poptracker -- generated files match the world data
 # also: the AP minimum version the docs advertise matches archipelago.json
-# plus jscpd: zero clones at >=5 lines / >=50 tokens across all four repos.
+# plus jscpd: zero clones at >=5 lines / >=50 tokens across all three repos.
 # Install once: pip install ruff vulture; golangci-lint; luarocks install
 # luacheck; node (for npx jscpd).
 quality:
 	python3 scripts/audit_ap_version.py
 	$(MAKE) --no-print-directory -C world check-version lint deadcode
 	$(MAKE) --no-print-directory -C client lint deadcode audit
-	$(MAKE) --no-print-directory -C poptracker-pack check
 	$(MAKE) --no-print-directory duplication
 	cd spyrosim && if command -v golangci-lint >/dev/null 2>&1; then \
 		golangci-lint run ./...; \
@@ -98,10 +90,10 @@ quality:
 	fi
 
 # Copy-paste check: jscpd with the repo config (.jscpd.json) fails on any
-# clone. Generated data (regions.lua, locations.json, the pack maps) is
-# excluded there, since it is emitted by the generators, not written.
+# clone. Generated data (regions.lua, locations.json) is excluded there,
+# since it is emitted by the generators, not written.
 duplication:
-	$(JSCPD) world client spyrosim poptracker-pack --config .jscpd.json
+	$(JSCPD) world client spyrosim --config .jscpd.json
 
 # Remove every build product, including the root-level bundle zips that the
 # release targets drop here (gitignored, and nothing else deletes them).

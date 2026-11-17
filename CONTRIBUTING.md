@@ -6,7 +6,7 @@ your changes in.
 
 ## Repository layout
 
-This is a parent repo holding three submodules, each independently versioned
+This is a parent repo holding two submodules, each independently versioned
 and tagged:
 
 - [`world/`](world) (`reignited-ap-world`) — the Archipelago world: logic,
@@ -15,8 +15,6 @@ and tagged:
   player's machine: the UE4SS Lua mod (`srt_bridge`), the `checkd` Go
   daemon, and the launcher. See its
   [README](client/README.md) for component details.
-- [`poptracker-pack/`](poptracker-pack) (`reignited-ap-poptracker`) — the
-  PopTracker map pack and its generator.
 
 Start by reading the README of whichever submodule you'll work in.
 
@@ -88,13 +86,11 @@ submodules in one pass, each with the toolchain of the repo that owns the code:
 | `client/` (Lua) | `luacheck` | unused locals/arguments, dead branches, complexity > 10 |
 | `client/` | `audit_dead_lua.py` | module functions no script or spec calls |
 | `spyrosim/` | `golangci-lint` | unreachable simulator helpers, complexity > 10 |
-| `poptracker-pack/` | `gen_pack.py --check` | pack files that drifted from the world data |
 | all | `jscpd` (`.jscpd.json`) | copy-paste: any clone of 5+ lines / 50+ tokens |
 
 The bar is hard, not advisory: **no function above cyclomatic complexity 10,
-and zero duplicated blocks**. Generated data (`regions.lua`, `locations.json`,
-the pack maps) is excluded from the duplication scan because the generators
-emit it.
+and zero duplicated blocks**. Generated data (`regions.lua`, `locations.json`)
+is excluded from the duplication scan because the generators emit it.
 
 Install the tools once:
 

@@ -15,10 +15,6 @@
     "**/world/data/*.json",
     "**/checkd/locations.json",
     "**/Scripts/regions.lua",
-    "**/Scripts/constants.lua",
-    "**/poptracker-pack/scripts/spyro_locmap.lua",
-    "**/poptracker-pack/scripts/spyro_itemmap.lua",
-    "**/poptracker-pack/scripts/spyro_levels.lua",
-    "**/poptracker-pack/scripts/spyro_goalmap.lua"
+    "**/Scripts/constants.lua"
   ]
 }
