@@ -30,12 +30,15 @@ bridge location whenever it exists; a prefix without it falls back to the user
 with the newest save, then the first in lexical order. (Save discovery is
 separate: it always prefers the newest save, whichever profile holds it.)
 
-**Migration**: only `Install` migrates. If the selection rule picks the legacy
-folder and the new folder does not yet have `config.txt`/`srtap_checkd.exe`,
-copy the whole legacy tree into the new folder (do not delete the legacy tree),
-then delete `checkd.hb`, `checks.json` and `session.txt` in the new folder:
-they are session-scoped and a copied heartbeat would make a fresh checkd exit.
-After one install both sides select new, because new now contains the files.
+**Migration**: only `Install` moves the bridge files. If the selection rule picks
+the legacy folder and the new folder does not yet have
+`config.txt`/`srtap_checkd.exe`, copy the whole legacy tree into the new folder
+(do not delete the legacy tree), then delete `checkd.hb`, `checks.json` and
+`session.txt` in the new folder: they are session-scoped and a copied heartbeat
+would make a fresh checkd exit. If the rule picks the new folder, `Install`
+writes there and adopts it as the launcher's Bridge folder, even when the saved
+state still names the legacy path; the legacy tree is left alone. Either way
+both sides select new after one install, and the setup check clears.
 
 The launcher never creates `config.txt` when the bridge's parent directory does
 not exist yet (on Linux that would fabricate the Proton prefix), and it never
